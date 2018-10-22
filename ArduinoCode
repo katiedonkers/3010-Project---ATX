@@ -1,0 +1,89 @@
+
+
+// Stepper - Version: 1.1.3
+#include <Stepper.h>
+
+/*
+
+*/
+const int motor1 =8;
+const int motor2 = 9;
+const int motor3 = 10;
+const int motor4 = 11;
+const int stepsPerRevolution = 200;
+int stepTaken = 0; 
+Stepper myStepper(stepsPerRevolution, 8, 9, 10, 11);
+
+const int blueTrig = 3;
+const int blueEcho = 2;
+
+const int greenTrig = 5;
+const int greenEcho = 4;
+
+const int button = 6; 
+void setup() {
+ // pinMode(motor1,OUTPUT);
+  //pinMode(motor2,OUTPUT);
+//  pinMode(motor3,OUTPUT);
+  //pinMode(motor4,OUTPUT);
+  
+  pinMode(blueTrig, OUTPUT);
+  pinMode(blueEcho, INPUT);
+  
+  pinMode(greenTrig, OUTPUT);
+  pinMode(greenEcho, INPUT);
+  
+  pinMode(button, INPUT);
+  
+  myStepper.setSpeed(60);
+  digitalWrite(button,LOW);
+  Serial.begin(9600);
+}
+
+void loop() {
+ if(digitalRead(button) == HIGH){
+    //send info
+    while(1){
+      delay(10);
+    }
+  }
+  
+  //Serial.print(digitalRead(button));
+  while(digitalRead(button)!=HIGH){
+     Serial.println(stepTaken);
+    myStepper.step(stepsPerRevolution);
+    stepTaken++;
+    //butt = digitalRead(button);
+    //Serial.println(butt);
+    delay(500);
+  }
+ 
+   int count = 0;
+   int distance[100];
+   int duration; 
+   while(count<100){
+     //Serial.println(count);
+     digitalWrite(greenTrig, HIGH);
+     digitalWrite(blueTrig, HIGH);
+     delayMicroseconds(10); 
+     digitalWrite(greenTrig, LOW);
+     digitalWrite(blueTrig, LOW);
+     
+     duration = pulseIn(blueEcho, HIGH);
+     distance[count] = (duration * 0.034);
+     //Serial.println(distance[count]);
+     count++; 
+     delay(20); 
+   }
+    int averageDistance;
+  for(int i =0; i<100; i++){
+    averageDistance += distance[i];
+  }
+    
+    averageDistance = averageDistance/100; 
+    
+    Serial.println(averageDistance);
+    
+   
+}
+
