@@ -109,7 +109,21 @@ void loop() {
     
     Serial.println(averageDistance);        //sends average distance back to pi
     
-    startStop = 0;                        //ensures it doesnt rerun the loopp until told to 
+    startStop = 0;                        //ensures it doesnt rerun the loopp until told to
+    
+    //unwind 
+    while(stepTakenGreen != 0 && stepTakenBlue != 0){
+      if(stepTakenGreen != 0){
+        myGreenStepper.step(-stepsPerRevolution);
+        stepTakenGreen--;
+        delay(20);
+      }
+      if(stepTakenBlue != 0){
+        myBlueStepper.step(-stepsPerRevolution);
+        stepTakenBlue--;
+        delay(20);
+      }
+    }
  }  
 }
 
