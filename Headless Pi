@@ -1,0 +1,26 @@
+
+import serial;
+/*
+  
+  
+  code for reciving information from the android app
+  
+  
+*/
+
+
+
+def runArduino():                                     //function that runs arduino for 1 measurment 
+   
+  arduinoSerialData = serial.Serial('/dev/ttyACM0', 9600); //create variable to simplicy sending messages 
+                                                         // '/dev/ttyACM0' is the name of arduino on pi given in control panel when verified 
+  arduinoSerialData.write('1');                           //starts arduino 
+  
+  measurments = [];                                     //creates array for measurments 
+  count = 0;                                            //initialize temp counter 
+  while(count<3):           
+    if(arduinoSerialData.inWaiting()>0):
+        measurments.append(arduinoSerialData.readline()); //add measurment to end of array. order is circumferance 1, circumferance 2, distance 
+        count++;
+        
+  return measurments;                                   //returns array 
