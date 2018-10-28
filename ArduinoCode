@@ -55,11 +55,11 @@ void setup() {
 }
 
 void loop() {
-  /*
-  if(pi sending){             //waiting on the pi so start process
-    startStop = 1;            //start pi
+  
+  if(Serial.available()){             //waiting on the pi so start process
+    startStop = Serial.read();            //start pi
   }
-  */
+  
   
  if(startStop == 1) {         //only starts when pi says to 
   
