@@ -1,0 +1,28 @@
+#include <Stepper.h>
+const int stepsPerRevolution = 200;   //step size
+Stepper myBlueStepper(stepsPerRevolution, 0, 2, 1, 3); //middle pins inversed to allow movement in either direction
+Stepper myGreenStepper(stepsPerRevolution, 4, 6, 5, 7); 
+void setup() {
+  pinMode(buttonGreen, INPUT);
+  pinMode(buttonBlue, INPUT); 
+  myBlueStepper.setSpeed(60);     //set motor speed 
+  myGreenStepper.setSpeed(60);
+  digitalWrite(buttonGreen,LOW);  //initialize button pins to low 
+  digitalWrite(buttonBlue,LOW);
+  Serial.begin(9600);
+}
+void loop() {
+    while(digitalRead(buttonBlue)!=HIGH && digitalRead(buttonGreen)!=HIGH){   //run stepper motors till tightened
+    
+      if(digitalRead(buttonBlue)!=HIGH){                  //run blue stepper
+      myBlueStepper.step(stepsPerRevolution);
+      stepTakenBlue++;
+      delay(250);
+      }
+      if(digitalRead(buttonGreen)!=HIGH){                 //run green stepper 
+      myGreenStepper.step(stepsPerRevolution);
+      stepTakenGreen++;
+      delay(250);
+      }
+    }
+}
