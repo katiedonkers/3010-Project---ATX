@@ -20,41 +20,28 @@ from sqlite3 import Error
 
 messageSize = 1024 #1kb
 
+#stage 1 constants
+logIn=0
+retryLogin=1
+newUser=2
+newMeasurement=3
+easterEgg=4
+
+#stage 2 constants 
+NOUSERTYPE=5
+RETRYLOGINTYPE=6
+MAXLOGINTYPE=7
+FINISHEDMEASUREMENT=8
+ALLMEASUREMENTTYPE=9
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 #making a socket
-sock.bind('localhost',10000) #this takes ipAddr and port
+sock.bind(('localhost',10000)) #this takes ipAddr and port
 
-#get SQL initialized
-sqlConnection = initializesql(databaseName)
-cursor=connection.cursor()
-while(true):
-    main()
 
-        
-def main():
-
-    #Receive packet
-    data, address = sock.recfrom(messageSize)#needs timeouts
-
-    #parsePacket
-    payload = choice(parsePacket(data))
-
-    #do things based on payload
-    if payload>TYPEENUMERATIONSLISTLENGTH :
-        sock.sendTo(sendBackAllMeasurements(payload),address)
-    else if payload==noUserpayloadtype:
-        sock.sendTo(payload,address) ##might need try catch block for sending
-    else if payload==maxLoginspayloadtype:
-        sock.sendTo(payload,address)
-    else if payload==finishedNewMeasurement:
-        sock.sendTo(payload,address)
-    else if payload==easterEggType:
-        sock.sendTo(payload,address)
- 
     
-    
-def intializeSql(sqlDB):
+def initializesql(sqlDB):
     try:
         conn = sqlite3.connect(sqlDB)
         return conn
@@ -69,59 +56,61 @@ def parsePacket(data):
     typeVar = data[2]
     returnMessage=""
 
-    if (typeVar == logIn) returnMessage=login(data)
-    else if (typeVar == retryLogin) returnMessage=retryLogin(data)
-    else if (typeVar== newUser) returnMessage=newUser(data)
-    else if (typeVar == newMeasurement) returnMessage=newMeasurement(data)
-    else if (typeVar == easterEgg) returnMessage=easterEgg()
+    if (typeVar == logIn): returnMessage=login(data)
+    elif (typeVar == retryLogin): returnMessage=retryLogin(data)
+    elif (typeVar== newUser): returnMessage=newUser(data)
+    elif (typeVar == newMeasurement): returnMessage=newMeasurement(data)
+    elif (typeVar == easterEgg): returnMessage=easterEgg()
 
     return returnMessage
 
 def choice(choice):
     if choice=="more than  username exists":
         payload=THISTYPE #this is an enumeration
-    else if choice == "no user":
+    elif choice == "no user":
         payload=THISTYPE
-    else if choice=="max Logins":
+    elif choice=="max Logins":
         payload=THISTYPE
-    else if choice=="finishedNewMeasurement":
+    elif choice=="finishedNewMeasurement":
         payload=THISTYPE
-    else if choice == "easterEgg":
+    elif choice == "easterEgg":
         payload=THISTYPE
                    
-    else payload=choice#after successful login
+    else: payload=choice#after successful login
 
     return payload
 
 
 
 def login(data):
-    message = ""
+    sqlCommand="Select * from usernamesAndMeasurements where Username="
+    username=""
     if data.substring(userIs.size)=="userIS":
-        sqlCommand+=data
-    sqlCommand="Select * from ezTable where Username="
-    usernamestart = findStartandEnd(data,username)
-    username= data.substring(usernameStart[0],usernameStart[1])
+        username=data
+    else:
+        usernamestart = findStartandEnd(data,username)
+        username= data.substring(usernameStart[0],usernameStart[1])
+        
     sqlCommand+= username
-    
+        
     cursor.execute(sqlCommand)
     records = cursor.fetchall()
     
     if records.size == 1:
         return username
-    else if records.size>1:
+    elif records.size>1:
         return "more than  username exists"
-    else return "no user"
+    else: return "no user"
 
 def retryLogin(data):
-    count++
+    count=count+1 #this variable is not global
     if count<=3:
-        return returnMessage=login(data)
+        return login(data)
     else:
-        return returnMessage="max Logins"
+        return "max Logins"
 
 def newUser(data):
-    sqlCommand="INSERT INTO ezTable (userNames) VALUES (\""
+    sqlCommand="INSERT INTO usernamesAndMeasurements(userNames) VALUES (\""
     newUser=data.substring(findStartAndEnd(data,"newUser"))
     sqlCommand += newUser+"\")"
     cursor.execute(sqlCommand)
@@ -129,7 +118,7 @@ def newUser(data):
     login("userIs"+newUser)
 
 def newMeasurement(data):
-    sqlCommand="INSERT INTO ezTable (userNames,armLength,circum1,circum2) VALUES (\""
+    sqlCommand="INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\""
     username=data.substring(findStartandEnd(data,"userName"))
     armLength=data.substring(findStartandEnd(data,"armLength"))
     circum1 = data.substring(findStartandEnd(data,"circum1"))
@@ -142,21 +131,57 @@ def easterEgg():
     return "easterEgg"
 
 
-def getAllMeasurements(username):
-    sqlCommand="Select * from ezTable where Username="+username
-    cursor.execute(sqlCommand)
+def sendBackAllMeasurements(username):
+    sqlCommand = "Select * from usernamesAndMeasurements where Username=?"
+    cursor = sqlConnection.cursor()
+    cursor.execute(sqlCommand,(username,))
     records = cursor.fetchall()
-    payload=ALLMEASUREMENTTYPE + records.length #make sure they are strings
-    for (int i=0;i<records.length;i++):
-        payload+="SPECIALCODETHATSPLITSTHeROWS"
+    payload = ""+str(ALLMEASUREMENTTYPE) +""+ str(len(records)) #make sure they are strings
+    for i in range(len(records)):
+        payload+="xxxx"
         armLength,circum1,circum2 = parseSQLrow(records[i])
         payload +=  ((armLength.length+"armLength".size)+"armLength"+armLength+(circum1.length+circum1.length)+"circum1"+circum1+ (circum2.length+circum2.length)+"circum2"+circum2)
     return payload
+
+def parseSQLRrow(record):
+    armlength=record[1]
+    circum1=record[2]
+    circum2=record[3]
+
+    return (armlength,circum1, circum2)
         
     
     
-    
-    
+#python is stupid
+#get SQL initialized
+sqlConnection = initializesql("/home/pi/eztables.db")
+cursor=sqlConnection.cursor()
+while(True):
+    counter = 0
+    # Receive packet
+   # data, address = sock.recvfrom(messageSize)  # needs timeouts
+
+    #forTEsting
+    data = "123"
+    address=("127.0.0.1",1234)
+
+    # parsePacket
+    payload = choice(parsePacket(data))
+
+    # do things based on payload
+
+    if payload == NOUSERTYPE:
+        sock.sendto(payload, address)  ##might need try catch block for sending
+    elif payload == MAXLOGINTYPE:
+        sock.sendto(payload, address)
+    elif payload == FINISHEDMEASUREMENT:
+        sock.sendto(payload, address)
+    elif payload == easterEgg:
+        sock.sendto(payload, address)
+    else:
+        sock.sendto(bytes(sendBackAllMeasurements(payload),'utf-8'), address)
+
+
     
 
     
