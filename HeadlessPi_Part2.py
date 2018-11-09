@@ -3,48 +3,49 @@ import socket, sys, time
 measurementsPacketFlag = 5 
 
 # function to collect and send measurements from headless Pi to database Pi
-def sendMeasurements():
+def sendMeasurements(data):
 
-    host = '192.168.1.31'
-    port = 1003
+    host = '192.168.43.231'
+    port = 1050
     server_address = (host, port)
 
     #create socket
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(server_address)
 
     # send packet to database Pi
-    s.sendto(data.encode('utf-8'), server_address)
+    s.sendto(data, server_address)
 
 def formatPacket(data):
 
     #format packet
-    temp = "" + measurementsPacketFlag + "" + data[0] + "" + data[1] + "" + data[2] + ""
-    byteArray = bytearray(temp)
+    temp = "" + str(measurementsPacketFlag) + "" + str(data[0]) + "" + str(data[1]) + "" + str(data[2]) + ""
+    byteArray = bytearray(temp, 'utf8')
 
     # call sendMeasurements() with proper packet format
     sendMeasurements(byteArray)
-
-
+    
 #MAIN
+def main():
 
+    count = 1
 #measurements array [] will contain length, circumf1 (wrist) circumf2 (elbow) 
-while len(measurements) < 3:
-    #wait
+    measurements = [1,2,3]
 
-formatPacket(measurements)
-
-
-
-
-
-
-
-    buf, address = s.recvfrom(2048)
+    while (len(measurements) < 3):
+        count+=1
    
-print ("Received %s bytes from %s %s: " % (len(buf), address, buf ))
+    formatPacket(measurements)
+    print('hi')
 
-s.shutdown(1)
+
+main()
+#print ("Received %s bytes from %s %s: " % (len(buf), address, buf ))
+#s.shutdown(1)
+
+
+
+
+
 
 
 
