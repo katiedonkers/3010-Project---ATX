@@ -16,15 +16,16 @@
 import sys
 import socket
 import sqlite3
+import time
 from sqlite3 import Error
 
 messageSize = 1024  # 1kb
 
 # stage 1 constants
-logIn = 0
+logIn = str(0)
 retryLogin = 1
 newUser = 2
-newMeasurement = 3
+newMeasurement = str(3)
 easterEgg = 4
 
 # stage 2 constants
@@ -37,7 +38,7 @@ ALLMEASUREMENTTYPE = 9
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # making a socket
-sock.bind(('localhost', 1050))  # this takes ipAddr and port
+sock.bind(("192.168.43.231", 1050))  # this takes ipAddr and port
 
 
 def initializesql(sqldb):
@@ -53,19 +54,26 @@ def initializesql(sqldb):
 def parsePacket(data):
     # assuming no error on packet
     # get the packet type
-    typeVar = data[2]
+    typeVar = chr(data[0])
     returnMessage = ""
+    print("the typeVar is "+typeVar)
+    #typeVar=2
+    print(typeVar ==str(2))
 
     if (typeVar == logIn):
         returnMessage = login(data)
     elif (typeVar == retryLogin):
         returnMessage = retryLogin(data)
-    elif (typeVar == newUser):
+    elif (typeVar ==str(2)):
+        print("executing this thing")
         returnMessage = newUser(data)
-    elif (typeVar == newMeasurement):
+    elif (typeVar == str(3)):
+    
         returnMessage = newMeasurement(data)
     elif (typeVar == easterEgg):
         returnMessage = easterEgg()
+    else:
+        print("didnt know what to return")
 
     return returnMessage
 
@@ -84,22 +92,26 @@ def choice(choice):
 
     else:
         payload = choice  # after successful login
+        
+    print("the choice function returned"+ str(payload))
 
     return payload
 
 
 def login(data):
-    sqlCommand = "Select * from usernamesAndMeasurements where Username=?"
-    username = data[3:13]
+    print("entering log in ")
+    sqlCommand = "Select * from usernamesAndMeasurements where username=?"
+    username = data[1:11]
+    print(username.decode('utf-8'))
 
    # sqlCommand += username
 
-    cursor.execute(sqlCommand,(username,))
+    cursor.execute(sqlCommand,(username.decode('utf-8'),))
     records = cursor.fetchall()
 
-    if records.size == 1:
-        return username
-    elif records.size > 1:
+    if len(records) == 1:
+        return username.decode('utf-8')
+    elif len(records)  > 1:
         return "more than  username exists"
     else:
         return "no user"
@@ -116,21 +128,35 @@ def retryLogin(data):
 
 
 def newUser(data):
-    sqlCommand = "INSERT INTO usernamesAndMeasurements(userNames) VALUES (?)"
-    newUser = data[3:13]
-    sqlCommand += newUser + "\")"
-    cursor.execute(sqlCommand, (newUser,))
+    print("getting ready to insert a nwe username")
+    sqlCommand = "INSERT INTO usernamesAndMeasurements(username) VALUES (\"?\")"
+    newUser = data[1:11]
+    newUser2 = newUser.decode('utf-8')
+    print(newUser2)
+    with sqlConnection:
+        cursor.execute("INSERT INTO usernamesAndMeasurements(username) VALUES (?)", (newUser2,))
+        
+  
+    sqlConnection.commit()
+    #cursor.execute("Select * from usernamesAndMeasurements ")
+    #print(cursor.fetchall())
+    
+   # cursor.close()
+    
     # return "successFul newUserCreation"
     login(data)
 
 
 def newMeasurement(data):
-    sqlCommand = "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (?,?,?,?)"
-    username = data[3:13]
-    armLength = data[13]
-    circum1 =data[14]
-    circum2 = data[15]
-    cursor.execute(sqlCommand,(username,armLength,circum1,circum2))
+    #delete old measurement
+    sqlCommand = "DELETE FROM usernamesAndMeasurements WHERE username=? "
+    sqlCommand2 = "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (?,?,?,?)"
+    username = data[1:11]
+    armLength = data[11]
+    circum1 =data[12]
+    circum2 = data[13]
+    cursor.execute(sqlCommand,(username.decode('utf'),))
+    cursor.execute(sqlCommand,(username.decode('utf'),armLength,circum1,circum2))
     return "finishedNewMeasurement"
 
 
@@ -139,12 +165,16 @@ def easterEgg():
 
 
 def sendBackAllMeasurements(username):
-    sqlCommand = "Select * from usernamesAndMeasurements where Username=?"
+    sqlCommand = "Select * from usernamesAndMeasurements where username=?"
+    print("the username is " + username)
     #cursor = sqlConnection.cursor()
     cursor.execute(sqlCommand, (username,))
     records = cursor.fetchall()
     #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  # make sure they are strings
     payload = "" + str(ALLMEASUREMENTTYPE)
+    print("checkpoint 2")
+    print("payload is "+payload)
+    print(records)
     for i in range(len(records)):
         #payload += "xxxx"
         armLength, circum1, circum2 = parseSQLRrow(records[i])
@@ -152,13 +182,15 @@ def sendBackAllMeasurements(username):
               #      circum1.length + circum1.length) + "circum1" + circum1 + (
                            #     circum2.length + circum2.length) + "circum2" + circum2)
         payload += str(armLength)+str(circum1)+str(circum2)
+        
+    print("payload again is "+payload)
     return payload
 
 
-def parseSQLRrow(record):
-    armlength = record[1]
-    circum1 = record[2]
-    circum2 = record[3]
+def parseSQLRrow(parsePacketrecord):
+    armlength = parsePacketrecord[1]
+    circum1 = parsePacketrecord[2]
+    circum2 = parsePacketrecord[3]
 
     return (armlength, circum1, circum2)
 
@@ -167,10 +199,41 @@ def parseSQLRrow(record):
 # get SQL initialized
 sqlConnection = initializesql("/home/pi/eztables.db")
 cursor = sqlConnection.cursor()
+#sqlite3.autocommit(True)
+
 while (True):
+    
+    print("start of loop")
     counter = 0
+    print("printing all the rows in the table")
+    
+    cursor.execute("Select * from usernamesAndMeasurements ")
+    print(cursor.fetchall())
+    #print("trying to insert the thing")
+    #cursor.execute("INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)")
+   # "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
+   # sqlConnection.commit()
+    #print("insert done")
+    #cursor.execute("Select * from usernamesAndMeasurements ")
+    #print(cursor.fetchall())
+    
+    
+    
     # Receive packet
-    data, address = sock.recvfrom(messageSize)  # needs timeouts
+    data, address = sock.recvfrom(messageSize)# needs timeouts
+    address2 = "192.168.43.128"
+    port2 = 53477
+    katie_address= (address2,port2)
+    time.sleep(1)
+    
+   # try:
+      #  sock.sendto(bytes("hi", 'utf-8'), katie_address)
+     # sock.sendto(bytes(str(payload), 'utf-8'), katie_address) 
+    #except Exception:
+    #   print("failed test sending")
+        
+    print(data)
+    print(address)
 
     # forTEsting
    # data = "123"
@@ -178,19 +241,34 @@ while (True):
 
     # parsePacket
     payload = choice(parsePacket(data))
+    print("checkpoint 1")
+    print(payload)
+    time.sleep(2)
 
     # do things based on payload
+    try: 
+  
+        if payload == NOUSERTYPE:
 
-    if payload == NOUSERTYPE:
-        sock.sendto(payload, address)  ##might need try catch block for sending
-    elif payload == MAXLOGINTYPE:
-        sock.sendto(payload, address)
-    elif payload == FINISHEDMEASUREMENT:
-        sock.sendto(payload, address)
-    elif payload == easterEgg:
-        sock.sendto(payload, address)
-    else:
-        sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), address)
+                           
+                 print("sending a no user type")
+                 sock.sendto(bytes(str(payload), 'utf-8'), katie_address)  ##might need try catch block for sending
+                 print("sent complete")
+            
+        elif payload == MAXLOGINTYPE:
+                sock.sendto(payload, address)
+        elif payload == FINISHEDMEASUREMENT:
+                sock.sendto(payload, address)
+        elif payload == easterEgg:
+                sock.sendto(payload, address)
+        else:
+            print("trying to send measurements")
+            sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), katie_address)
+    except Exception as e:
+                print(e)
+    
+
+
 
 
 
