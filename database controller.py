@@ -72,7 +72,7 @@ def parsePacket(data):
 
 def choice(choice):
     if choice == "more than  username exists":
-        payload = 9 # this is an enumeration
+        payload = 10 # this is an enumeration
     elif choice == "no user":
         payload = NOUSERTYPE
     elif choice == "max Logins":
@@ -89,17 +89,12 @@ def choice(choice):
 
 
 def login(data):
-    sqlCommand = "Select * from usernamesAndMeasurements where Username="
-    username = ""
-    if data.substring(userIs.size) == "userIS":
-        username = data
-    else:
-       # usernamestart = findStartandEnd(data, username)
-        username = data[2:13]
+    sqlCommand = "Select * from usernamesAndMeasurements where Username=?"
+    username = data[3:13]
 
-    sqlCommand += username
+   # sqlCommand += username
 
-    cursor.execute(sqlCommand)
+    cursor.execute(sqlCommand,(username,))
     records = cursor.fetchall()
 
     if records.size == 1:
@@ -111,30 +106,31 @@ def login(data):
 
 
 def retryLogin(data):
+    global count
     count = count + 1  # this variable is not global
     if count <= 3:
         return login(data)
     else:
+        count = 0
         return "max Logins"
 
 
 def newUser(data):
-    sqlCommand = "INSERT INTO usernamesAndMeasurements(userNames) VALUES (?"
-    newUser = data.substring(findStartAndEnd(data, "newUser"))
+    sqlCommand = "INSERT INTO usernamesAndMeasurements(userNames) VALUES (?)"
+    newUser = data[3:13]
     sqlCommand += newUser + "\")"
-    cursor.execute(sqlCommand)
+    cursor.execute(sqlCommand, (newUser,))
     # return "successFul newUserCreation"
-    login("userIs" + newUser)
+    login(data)
 
 
 def newMeasurement(data):
-    sqlCommand = "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\""
-    username = data.substring(findStartandEnd(data, "userName"))
-    armLength = data.substring(findStartandEnd(data, "armLength"))
-    circum1 = data.substring(findStartandEnd(data, "circum1"))
-    circum2 = data.substring(findStartandEnd(data, "circum2"))
-    sqlCommands += "\"" + armLength + ",\"" + circum1 + ",\"" + circum2 + ")"
-    cursor.execute(sqlCommands)
+    sqlCommand = "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (?,?,?,?)"
+    username = data[3:13]
+    armLength = data[13]
+    circum1 =data[14]
+    circum2 = data[15]
+    cursor.execute(sqlCommand,(username,armLength,circum1,circum2))
     return "finishedNewMeasurement"
 
 
@@ -144,16 +140,18 @@ def easterEgg():
 
 def sendBackAllMeasurements(username):
     sqlCommand = "Select * from usernamesAndMeasurements where Username=?"
-    cursor = sqlConnection.cursor()
+    #cursor = sqlConnection.cursor()
     cursor.execute(sqlCommand, (username,))
     records = cursor.fetchall()
-    payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  # make sure they are strings
+    #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  # make sure they are strings
+    payload = "" + str(ALLMEASUREMENTTYPE)
     for i in range(len(records)):
-        payload += "xxxx"
-        armLength, circum1, circum2 = parseSQLrow(records[i])
-        payload += ((armLength.length + "armLength".size) + "armLength" + armLength + (
-                    circum1.length + circum1.length) + "circum1" + circum1 + (
-                                circum2.length + circum2.length) + "circum2" + circum2)
+        #payload += "xxxx"
+        armLength, circum1, circum2 = parseSQLRrow(records[i])
+       # payload += ((armLength.length + "armLength".size) + "armLength" + armLength + (
+              #      circum1.length + circum1.length) + "circum1" + circum1 + (
+                           #     circum2.length + circum2.length) + "circum2" + circum2)
+        payload += str(armLength)+str(circum1)+str(circum2)
     return payload
 
 
@@ -172,11 +170,11 @@ cursor = sqlConnection.cursor()
 while (True):
     counter = 0
     # Receive packet
-    # data, address = sock.recvfrom(messageSize)  # needs timeouts
+    data, address = sock.recvfrom(messageSize)  # needs timeouts
 
     # forTEsting
-    data = "123"
-    address = ("127.0.0.1", 1234)
+   # data = "123"
+    #address = ("127.0.0.1", 1234)
 
     # parsePacket
     payload = choice(parsePacket(data))
@@ -193,6 +191,7 @@ while (True):
         sock.sendto(payload, address)
     else:
         sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), address)
+
 
 
 
