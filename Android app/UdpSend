@@ -1,0 +1,97 @@
+package com.example.katie.atx;
+
+import android.util.Log;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.lang.*;
+import java.net.SocketTimeoutException;
+
+public class UdpSend  implements Runnable {
+
+
+    String host = "192.168.43.231";
+    int port = 1050;
+    int port2 = 1051;
+    String msg = "0";
+
+    public UdpSend(String msg) {
+        this.msg += msg;
+
+    }
+
+
+    @Override
+    public void run() {
+        boolean run = true;
+        try {
+
+            DatagramSocket udpSocket = new DatagramSocket(port2);
+            InetAddress serverAddr = InetAddress.getByName(host);
+
+            System.out.println("Listening Port: " + udpSocket.getLocalPort());
+
+            byte[] buf = msg.getBytes();
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, serverAddr, port);
+            udpSocket.send(packet);
+            while (run) {
+                try {
+                    byte[] message = new byte[1024];
+                    DatagramPacket rcvpacket = new DatagramPacket(message, message.length);
+                    Log.i("UDP client: ", "about to wait to receive");
+                    //udpSocket.setSoTimeout(10000);
+                    DatagramSocket rcvSocket = new DatagramSocket();
+                    rcvSocket.receive(rcvpacket);
+                    System.out.println("we have received, about to print");
+                    String text = new String(message, 0, rcvpacket.getLength());
+                    Log.d("Received text", text);
+                } catch (IOException e) {
+                    Log.e(" UDP  has IOException", "error: ", e);
+                    run = false;
+                    udpSocket.close();
+                /*} catch (SocketTimeoutException er) {
+                    Log.e("Timeout Exception", "UDP Connection:", er);
+                    run = false;
+                    udpSocket.close();
+                */}
+            }
+
+        } catch (Exception e) {
+            Log.e(" UDP has IOException", "error: ", e);
+
+        }
+
+    }
+}
+       /* try {
+            DatagramSocket udpSocket = new DatagramSocket(port);
+            InetAddress serverAddr = InetAddress.getByName(host);
+            byte[] buf = msg.getBytes();
+            DatagramPacket packet = new DatagramPacket(buf, buf.length,serverAddr, port);
+            udpSocket.send(packet);
+        } catch (SocketException e) {
+            Log.e("Udp:", "Socket Error:", e);
+        } catch (IOException e) {
+            Log.e("Udp Send:", "IO Error:", e);
+        }
+
+        try {
+            DatagramSocket rcvSocket = new DatagramSocket(port2);
+            byte[] message = new byte[8000];
+            DatagramPacket rcvPacket = new DatagramPacket(message, message.length);
+            Log.i("UDP client: ", "about to wait to receive");
+            rcvSocket.receive(rcvPacket);
+            String text = new String(message, 0, rcvPacket.getLength());
+            Log.d("Received data", text);
+            String step = message.toString();
+            Log.i(step, step);
+        }catch (IOException e) {
+            Log.e("IOException", "error: ", e);
+        }*/
+
+
+
+
