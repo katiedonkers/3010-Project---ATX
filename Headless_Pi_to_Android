@@ -1,0 +1,21 @@
+import socket, sys, time
+
+host = "192.168.43.128"
+port = 53477
+server_address = (host, port)
+host_address = ("192.168.43.231", 1050)
+
+temp = '121'
+#temp2= str(temp)
+#byteArray = bytes(temp2, 'utf-8')
+
+
+#create socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print('trying to bind')
+s.bind(host_address)
+print('bound')
+
+# send packet to database Pi
+s.sendto(temp.encode("utf-8"), server_address)
+print('sent packet')
