@@ -16,21 +16,21 @@ const long distanceStep = 5; //temp length
 
 //motor set up
 const int stepsPerRevolution = 200;   //step size
-Stepper myBlueStepper(stepsPerRevolution, 0, 2, 1, 3); //middle pins inversed to allow movement in either direction
-Stepper myGreenStepper(stepsPerRevolution, 4, 6, 5, 7); 
+Stepper myBlueStepper(stepsPerRevolution, 5, 7, 6, 8); //middle pins inversed to allow movement in either direction
+Stepper myGreenStepper(stepsPerRevolution, 9, 11, 10, 12); 
 int stepTakenGreen = 0;               //number of steps taken
 int stepTakenBlue = 0;
 
 //Button Pins
-const int buttonGreen = 8;          //setting pins to parts
-const int buttonBlue = 9; 
+const int buttonGreen = 3;          //setting pins to parts
+const int buttonBlue = 2; 
 
 //Ultrasonic sensor Pinss
-const int blueTrig = 10;
-const int blueEcho = 11;
+const int blueTrig = 13;
+const int blueEcho = 4;
 
-const int greenTrig = 12;
-const int greenEcho = 14;
+const int greenTrig = 1;
+const int greenEcho = 0;
 
 
 void setup() {
@@ -56,22 +56,21 @@ void setup() {
 
 void loop() {
   
-  if(Serial.available()){             //waiting on the pi so start process
-    startStop = Serial.read();            //start pi
+  if(Serial.read() == 49){             //waiting on the pi so start process
+    startStop = 1;            //start pi
   }
-  
   
  if(startStop == 1) {         //only starts when pi says to 
   
   while(digitalRead(buttonBlue)!=HIGH && digitalRead(buttonGreen)!=HIGH){   //run stepper motors till tightened
     
     if(digitalRead(buttonBlue)!=HIGH){                  //run blue stepper
-    myBlueStepper.step(stepsPerRevolution);
+    myBlueStepper.step(-stepsPerRevolution);
     stepTakenBlue++;
     delay(250);
     }
     if(digitalRead(buttonGreen)!=HIGH){                 //run green stepper 
-    myGreenStepper.step(stepsPerRevolution);
+    myGreenStepper.step(-stepsPerRevolution);
     stepTakenGreen++;
     delay(250);
     }
@@ -80,7 +79,7 @@ void loop() {
   }
   
   lengthCalc();                           //calculates length of both circomference 
- 
+
   Serial.println(lengthBlue);             //sends info back to pi that is waiting
   Serial.println(lengthGreen);
  
@@ -109,21 +108,22 @@ void loop() {
     
     Serial.println(averageDistance);        //sends average distance back to pi
     
-    startStop = 0;                        //ensures it doesnt rerun the loopp until told to
+    startStop = 0;                        //ensures it doesnt rerun the loopp until told to 
     
     //unwind 
     while(stepTakenGreen != 0 && stepTakenBlue != 0){
       if(stepTakenGreen != 0){
-        myGreenStepper.step(-stepsPerRevolution);
+        myGreenStepper.step(stepsPerRevolution);
         stepTakenGreen--;
         delay(20);
       }
       if(stepTakenBlue != 0){
-        myBlueStepper.step(-stepsPerRevolution);
+        myBlueStepper.step(stepsPerRevolution);
         stepTakenBlue--;
         delay(20);
       }
     }
+
  }  
 }
 
@@ -131,6 +131,8 @@ void lengthCalc(){
    lengthBlue = strapLength - (stepTakenBlue*distanceStep);  //calculates the circumfrance of the arm using the length of stap - the number of steps times the distance pre step
    lengthGreen = strapLength - (stepTakenGreen*distanceStep);
 }
+
+
 
 
 
