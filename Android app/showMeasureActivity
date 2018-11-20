@@ -1,24 +1,64 @@
 package com.example.katie.atx;
 
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
+import android.view.View;
 
 public class showMeasureActivity extends AppCompatActivity {
+
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_measure);
 
+        System.out.println("we are in show measure");
         Intent intent = getIntent();
         String message = intent.getStringExtra(UdpSend.EXTRA_MESSAGE);
 
-        TextView textView = findViewById(R.id.measurementText);
-        textView.setText(message);
+        //Display username
+        TextView textView2 = findViewById(R.id.NameOnMeasPage);
+        String username = message;
+        textView2.setText("Username: " + username.substring(1, 10 ));
+
+        //Display Measurements
+         textView = findViewById(R.id.measurementText);
+        textView.setText("Length: " + message.substring(11, 12) + "\n Wrist Circumference: " + message.substring(12, 13) + "\n Elbow Circumference: " + message.substring(13, 14));
+
     }
 
+    public void startMeasureButton(View view){
+        System.out.println("We are startMeasureButton function");
 
+        UdpSendPi cls = new UdpSendPi();
+        System.out.println("creating thread udp send");
+        Thread thread = new Thread(cls);
+        System.out.println("about to start thread");
+        thread.start();
+        System.out.println("thread started");
 
+        //Get information from Pi
+//        String msg = cls.getMsg();
+//
+//        //GET PACKET BACK TO MAIN - deal with errors, and adding to database in MAIN
+//
+//        //display new measurements to user
+//        textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
+
+//        try {
+//            Thread.sleep(10000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+//        String popup1 = "Taking your new measurements! Stay tuned...";
+//        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,
+//                6000);
+//        mySnackbar.show();
+    }
 }
