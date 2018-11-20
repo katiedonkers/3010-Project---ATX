@@ -34,6 +34,4 @@ public class DisplayMessageActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-
-
 }
