@@ -1,3 +1,7 @@
+/*
+
+*/
+
 //motor set up
 #include <Stepper.h>
 int startStop; //to start the measuring process
@@ -6,13 +10,13 @@ long lengthBlue;              //calculated length
 long lengthGreen;             // calculated length 
 const long distanceStep = 5; //temp length
 const int stepsPerRevolution = 200;   //step size
-Stepper myBlueStepper(stepsPerRevolution, 0, 2, 1, 3); //middle pins inversed to allow movement in either direction
-Stepper myGreenStepper(stepsPerRevolution, 4, 6, 5, 7); 
+Stepper myBlueStepper(stepsPerRevolution, 5, 7, 6, 8); //middle pins inversed to allow movement in either direction
+Stepper myGreenStepper(stepsPerRevolution, 9, 11, 10, 12); 
 int stepTakenGreen = 0;               //number of steps taken
 int stepTakenBlue = 0;
 //Button Pins
-const int buttonGreen = 8;          //setting pins to parts
-const int buttonBlue = 9; 
+const int buttonGreen = 3;          //setting pins to parts
+const int buttonBlue = 2; 
 void setup() {
   pinMode(buttonGreen, INPUT);
   pinMode(buttonBlue, INPUT);  
@@ -23,21 +27,20 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-    if(Serial.available()){             //waiting on the pi so start process
-    startStop = Serial.read();            //start pi
-  }
- if(startStop == 1) {         //only starts when pi says to 
+ 
   int countB = 0;
   int countG = 0; 
   while(digitalRead(buttonBlue)!=HIGH && digitalRead(buttonGreen)!=HIGH){   //run stepper motors till tightened
     if(digitalRead(buttonBlue)!=HIGH){                  //run blue stepper
     myBlueStepper.step(stepsPerRevolution);
     stepTakenBlue++;
+    countB++;
     delay(250);
     }
     if(digitalRead(buttonGreen)!=HIGH){                 //run green stepper 
     myGreenStepper.step(stepsPerRevolution);
     stepTakenGreen++;
+    countG++;
     delay(250);
     }
     if(countB==5){
@@ -47,8 +50,9 @@ void loop() {
       digitalWrite(buttonGreen, HIGH);
     }
   }
-  lengthCalc();                           //calculates length of both circomference 
+ // lengthCalc();                           //calculates length of both circomference 
   Serial.println(lengthBlue);             //sends info back to pi that is waiting
   Serial.println(lengthGreen);
    startStop = 0; 
+
 }
