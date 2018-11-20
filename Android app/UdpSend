@@ -18,14 +18,19 @@ public class UdpSend extends AppCompatActivity implements Runnable  {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
     String ip= "192.168.43.231";
     String msg;
+    int flag = 0;
     public UdpSend(String msg){
         this.msg = msg;
+    }
+
+    public UdpSend(String msg, int flag){
+        this.msg = msg;
+        this.flag = flag;
     }
     @Override
     public void run() {
         try{
-
-            DatagramSocket serverSocket = new DatagramSocket(9878);
+            DatagramSocket serverSocket = new DatagramSocket(9878 + flag);
             byte[] receiveData = new byte[1024];
             byte[] sendData = new byte[1024];
             boolean running = true;
