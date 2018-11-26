@@ -39,10 +39,9 @@ def initializesql(sqldb):
         return conn
     except Error as e:
         print(e)
-
         return None
 
-
+#stage 1
 def parsePacket(data):
     # assuming no error on packet
     # get the packet type
@@ -63,7 +62,7 @@ def parsePacket(data):
 
     return returnMessage
 
-
+#stage 2
 def choice(choice):
     if choice == "more than  username exists":
         payload = 10 
@@ -201,16 +200,7 @@ while (True):
     print("printing all the rows in the table")
     cursor.execute("Select * from usernamesAndMeasurements ")
     print(cursor.fetchall())
-    
-    #code for database quick access
-    #cursor.execute("DELETE FROM usernamesAndMeasurements WHERE username=?",(bytes(str(tempDeleteme), 'utf-8'),))
-    #sqlConnection.commit()
-    #print("Inserting record")
-    #cursor.execute("INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)")
-    #"INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
-    #sqlConnection.commit()
-    #print("insert done")
-    
+        
     # Receive packet
     data, address = sock.recvfrom(messageSize)# needs timeout
     time.sleep(1)     
@@ -222,16 +212,15 @@ while (True):
     print("The payload is "+payload)
     time.sleep(2)
 
-    # do things based on payload, needs refactoring (unneeded if cases)
+    # Send back a packet based on payload value, needs refactoring (unneeded if cases)
     try:  
         if payload == NOUSERTYPE:   #not implemented in client                                        
             print("sending a no user type")
             sock.sendto(bytes(str(payload), 'utf-8'), address)  ##might need try catch block for sending
                       
-        elif payload == MAXLOGINTYPE:
+        elif payload == MAXLOGINTYPE or payload == FINISHEDMEASUREMENT:
             sock.sendto(payload, address)
-        elif payload == FINISHEDMEASUREMENT:
-            sock.sendto(payload, address)
+            
         elif payload == BADUSERNAME or payload==BADPARSE or payload == BADBYTES:
             sock.sendto(bytes(str(payload), 'utf-8'),address)
             
@@ -240,6 +229,16 @@ while (True):
             sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), address)
     except Exception as e:
                 print(e)
+            
+            
+    #code for database quick access
+    #cursor.execute("DELETE FROM usernamesAndMeasurements WHERE username=?",(bytes(str(tempDeleteme), 'utf-8'),))
+    #sqlConnection.commit()
+    #print("Inserting record")
+    #cursor.execute("INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)")
+    #"INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
+    #sqlConnection.commit()
+    #print("insert done")
     
 
 
