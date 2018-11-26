@@ -1,5 +1,6 @@
 # Tuesday-5 
-# This program acts as the database controller, it receives a packet and based on the type field it executes different operations.
+# This program acts as the database controller, it receives a packet 
+# and based on the type field it executes different operations.
 
 import sys
 import socket
