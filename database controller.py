@@ -1,17 +1,5 @@
-# receive
-# decide what packet it is/check error
-# save username it came from
-# if it is log in packet, query table for username
-# ii) parse SQL return then if user found send a packet back and save the user in a variable here
-# iii) if user not found then send a packet asking if u want new user creation
-#
-# if its a packet from the same username:
-# return all packet: this should return a select * from table
-# return latest : return the latest record with the username
-# newUserPacket: insert new user record
-#
-# submitMeasurements packet: do a insert in the table with the username that we have
-#
+# Tuesday-5 
+# This program acts as the database controller, it receives a packet and based on the type field it executes different operations.
 
 import sys
 import socket
@@ -26,7 +14,7 @@ logIn = str(0)
 retryLogin = 12
 newUser = 2
 newMeasurement = str(3)
-easterEgg = 15
+
 
 # stage 2 constants
 NOUSERTYPE = 5
@@ -61,21 +49,15 @@ def parsePacket(data):
     typeVar = chr(data[0])
     returnMessage = ""
     print("the typeVar is "+typeVar)
-    #typeVar=2
-    print(typeVar ==str(2))
 
     if (typeVar == logIn):
         returnMessage = login(data)
     elif (typeVar == retryLogin):
         returnMessage = retryLogin(data)
     elif (typeVar ==str(2)):
-        print("executing this thing")
         returnMessage = newUser(data)
-    elif (typeVar == str(3)):
-    
+    elif (typeVar == str(3)):   
         returnMessage = newMeasurement(data)
-    elif (typeVar == easterEgg):
-        returnMessage = easterEgg()
     else:
         returnMessage="didnt know what to return"
 
@@ -84,15 +66,13 @@ def parsePacket(data):
 
 def choice(choice):
     if choice == "more than  username exists":
-        payload = 10 # this is an enumeration
+        payload = 10 
     elif choice == "no user":
         payload = NOUSERTYPE
     elif choice == "max Logins":
         payload = MAXLOGINTYPE
     elif choice == "finishedNewMeasurement":
         payload = FINISHEDMEASUREMENT
-    elif choice == "easterEgg":
-        payload = easterEgg
     elif choice== "badUsername":
         payload = BADUSERNAME
     elif choice == "didnt know what to return":
@@ -103,21 +83,20 @@ def choice(choice):
     else:
         payload = choice  # after successful login
         
-    print("the choice function returned"+ str(payload))
+    print("the choice function returned"+ str(payload)) #for debugging purposes
 
     return payload
 
 
+#if the database finds that username, return it. If not, return an error message.
 def login(data):
     print("entering log in ")
     badLogin = False
     if len(data) >11:
         badLogin = True
-        #send a bad usernamePacket then leave login function 
     sqlCommand = "Select * from usernamesAndMeasurements where username=?"
     username = data[1:11]
-    print(username.decode('utf-8'))
-
+    print(username.decode('utf-8')) #for debugging
 
     cursor.execute(sqlCommand,(username.decode('utf-8'),))
     records = cursor.fetchall()
@@ -129,11 +108,9 @@ def login(data):
     elif len(records)  > 1:
         return "more than  username exists"
     else:
-        return "no user"
+        return "no user" 
     
-
-
-
+#Not implemented on client side
 def retryLogin(data):
     global count
     count = count + 1  # this variable is not global
@@ -143,28 +120,27 @@ def retryLogin(data):
         count = 0
         return "max Logins"
 
-
+#Adds a user to the database then logs in with that user
 def newUser(data):
-    print("getting ready to insert a nwe username")
-    sqlCommand = "INSERT INTO usernamesAndMeasurements(username) VALUES (\"?\")"
-    newUser = data[1:11]
-    newUser2 = newUser.decode('utf-8')
-    print(newUser2)
+    print("getting ready to insert a new username") #debugging logs
+    newUser = data[1:11].decode('utf-8')
+    print(newUser)
     with sqlConnection:
-        cursor.execute("INSERT INTO usernamesAndMeasurements(username) VALUES (?)", (newUser2,))
+        cursor.execute("INSERT INTO usernamesAndMeasurements(username) VALUES (?)", (newUser,))
         
   
     sqlConnection.commit()
     login(data)
 
-
+#Deletes any old measurement attached to that username, then adds a new one. If the new measurement contains null return a bad bytes message
+#Returns a success message 
 def newMeasurement(data):
     #delete old measurement
     sqlCommand = "DELETE FROM usernamesAndMeasurements WHERE username=? "
-    sqlCommand2 = "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (?,?,?,?)"
-    print(data)
+    sqlCommand2 = "INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (?,?,?,?)"
+    #print(data)
     for i in range(len(data)):
-        print(data[i])
+        #print(data[i])
         if data[i] is None:
             return "badbytes"
     username = data[1:11]
@@ -176,23 +152,19 @@ def newMeasurement(data):
     return "finishedNewMeasurement"
 
 
-def easterEgg():
-    return "easterEgg"
-
 
 def sendBackAllMeasurements(username):
     sqlCommand = "Select * from usernamesAndMeasurements where username=?"
-    print("the username is " + username)
-    #cursor = sqlConnection.cursor()
+    print("the username is " + username) #debugging logs
     cursor.execute(sqlCommand, (username,))
     records = cursor.fetchall()
-    #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  # make sure they are strings
+    #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  #for multi measurement implementation
     payload = "" + str(ALLMEASUREMENTTYPE)
-    print("checkpoint 2")
+    #print("checkpoint 2") #debugging logs
     print("payload is "+payload)
     print(records)
-    for i in range(len(records)):
-        #payload += "xxxx"
+    for i in range(len(records)): #for multi-measurement implementation
+        #payload += "xxxx" 
         armLength, circum1, circum2 = parseSQLRrow(records[i])
        # payload += ((armLength.length + "armLength".size) + "armLength" + armLength + (
               #      circum1.length + circum1.length) + "circum1" + circum1 + (
@@ -202,7 +174,7 @@ def sendBackAllMeasurements(username):
     print("payload again is "+payload)
     return payload
 
-
+#a method to get retrieve info from database record
 def parseSQLRrow(parsePacketrecord):
     armlength = parsePacketrecord[1]
     circum1 = parsePacketrecord[2]
@@ -211,7 +183,12 @@ def parseSQLRrow(parsePacketrecord):
     return (armlength, circum1, circum2)
 
 
-# python is stupid
+##############################################################################
+
+#                          S T A R T  O F  M A I N                           #
+
+##############################################################################
+
 # get SQL initialized
 sqlConnection = initializesql("/home/pi/eztables.db")
 cursor = sqlConnection.cursor()
@@ -220,70 +197,47 @@ cursor = sqlConnection.cursor()
 while (True):
     
     print("start of loop")
-    counter = 0
+    #counter = 0
     print("printing all the rows in the table")
-    tempDeleteme= "katiedonke"
     cursor.execute("Select * from usernamesAndMeasurements ")
     print(cursor.fetchall())
-    cursor.execute("DELETE FROM usernamesAndMeasurements WHERE username=?",(bytes(str(tempDeleteme), 'utf-8'),))
-    sqlConnection.commit()
-    #print("trying to insert the thing")
+    
+    #code for database quick access
+    #cursor.execute("DELETE FROM usernamesAndMeasurements WHERE username=?",(bytes(str(tempDeleteme), 'utf-8'),))
+    #sqlConnection.commit()
+    #print("Inserting record")
     #cursor.execute("INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)")
-   # "INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
-   # sqlConnection.commit()
+    #"INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
+    #sqlConnection.commit()
     #print("insert done")
-    #cursor.execute("Select * from usernamesAndMeasurements ")
-    #print(cursor.fetchall())
-    
-    
     
     # Receive packet
-    data, address = sock.recvfrom(messageSize)# needs timeouts
-    address2 = "192.168.43.128"
-    port2 = 53477
-    katie_address= (address2,port2)
-    time.sleep(1)
-    
-   # try:
-      #  sock.sendto(bytes("hi", 'utf-8'), katie_address)
-     # sock.sendto(bytes(str(payload), 'utf-8'), katie_address) 
-    #except Exception:
-    #   print("failed test sending")
-        
+    data, address = sock.recvfrom(messageSize)# needs timeout
+    time.sleep(1)     
     print(data)
     print(address)
 
-    # forTEsting
-   # data = "123"
-    #address = ("127.0.0.1", 1234)
-
     # parsePacket
     payload = choice(parsePacket(data))
-    print("checkpoint 1")
-    print(payload)
+    print("The payload is "+payload)
     time.sleep(2)
 
-    # do things based on payload #tip for refactoring code: dont need all the elifs, just check if the payload length is more than 1
-    try: 
-  
-        if payload == NOUSERTYPE:
-                                          
+    # do things based on payload, needs refactoring (unneeded if cases)
+    try:  
+        if payload == NOUSERTYPE:   #not implemented in client                                        
             print("sending a no user type")
-            sock.sendto(bytes(str(payload), 'utf-8'), katie_address)  ##might need try catch block for sending
-            print("sent complete")
-            
+            sock.sendto(bytes(str(payload), 'utf-8'), address)  ##might need try catch block for sending
+                      
         elif payload == MAXLOGINTYPE:
             sock.sendto(payload, address)
         elif payload == FINISHEDMEASUREMENT:
             sock.sendto(payload, address)
-        elif payload == easterEgg:
-            sock.sendto(payload, address)
         elif payload == BADUSERNAME or payload==BADPARSE or payload == BADBYTES:
-            sock.sendto(bytes(str(payload), 'utf-8'),katie_address)
+            sock.sendto(bytes(str(payload), 'utf-8'),address)
             
-        else:
+        else: #its a request to show measurements
             print("trying to send measurements")
-            sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), katie_address)
+            sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), address)
     except Exception as e:
                 print(e)
     
