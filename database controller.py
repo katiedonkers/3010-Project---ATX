@@ -56,7 +56,7 @@ def parsePacket(data):
         returnMessage = retryLogin(data)
     elif (typeVar ==str(2)):
         returnMessage = newUser(data)
-    elif (typeVar == str(3)):   
+    elif (typeVar == newMeasurement ):   
         returnMessage = newMeasurement(data)
     else:
         returnMessage="didnt know what to return"
@@ -215,19 +215,13 @@ while (True):
 
     # Send back a packet based on payload value, needs refactoring (unneeded if cases)
     try:  
-        if payload == NOUSERTYPE:   #not implemented in client                                        
-            print("sending a no user type")
-            sock.sendto(bytes(str(payload), 'utf-8'), address)  ##might need try catch block for sending
-                      
-        elif payload == MAXLOGINTYPE or payload == FINISHEDMEASUREMENT:
-            sock.sendto(payload, address)
-            
-        elif payload == BADUSERNAME or payload==BADPARSE or payload == BADBYTES:
-            sock.sendto(bytes(str(payload), 'utf-8'),address)
+        if payload == NOUSERTYPE or payload == MAXLOGINTYPE or payload == FINISHEDMEASUREMENT or payload == BADUSERNAME or payload==BADPARSE or payload == BADBYTES :   #not implemented in client                                        
+            sock.sendto(bytes(str(payload), 'utf-8'), address)  
             
         else: #its a request to show measurements
             print("trying to send measurements")
             sock.sendto(bytes(sendBackAllMeasurements(payload), 'utf-8'), address)
+            
     except Exception as e:
                 print(e)
             
