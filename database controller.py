@@ -56,10 +56,11 @@ def parsePacket(data):
         returnMessage = retryLogin(data)
     elif (typeVar ==str(2)):
         returnMessage = newUser(data)
-    elif (typeVar == newMeasurement ):   
+    elif (typeVar == str(3)):   
         returnMessage = newMeasurement(data)
     else:
         returnMessage="didnt know what to return"
+    print("parsePacket is returning "+ str(returnMessage))
 
     return returnMessage
 
@@ -100,15 +101,17 @@ def login(data):
 
     cursor.execute(sqlCommand,(username.decode('utf-8'),))
     records = cursor.fetchall()
+    print("the length of the records is "+ str(len(records)))
     
     if badLogin == True:
         return "badUsername"
     elif len(records) == 1:
+        print("we are about to return username")
         return username.decode('utf-8')
     elif len(records)  > 1:
         return "more than  username exists"
     else:
-        return "no user" 
+        return newUser(data)
     
 #Not implemented on client side
 def retryLogin(data):
@@ -126,15 +129,16 @@ def newUser(data):
     newUser = data[1:11].decode('utf-8')
     print(newUser)
     with sqlConnection:
-        cursor.execute("INSERT INTO usernamesAndMeasurements(username) VALUES (?)", (newUser,))
+        cursor.execute("INSERT INTO usernamesAndMeasurements(username,armLength,circum1,circum2) VALUES (?,?,?,?)", (newUser,0,0,0))
         
   
     sqlConnection.commit()
-    login(data)
+    return login(data)
 
 #Deletes any old measurement attached to that username, then adds a new one. If the new measurement contains null return a bad bytes message
 #Returns a success message 
 def newMeasurement(data):
+    print("entering new measurement")
     #delete old measurement
     sqlCommand = "DELETE FROM usernamesAndMeasurements WHERE username=? "
     sqlCommand2 = "INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (?,?,?,?)"
@@ -148,7 +152,8 @@ def newMeasurement(data):
     circum1 =data[12]
     circum2 = data[13]
     cursor.execute(sqlCommand,(username.decode('utf'),))
-    cursor.execute(sqlCommand,(username.decode('utf'),armLength,circum1,circum2))
+    cursor.execute(sqlCommand2,(username.decode('utf'),armLength-48,circum1-48,circum2-48))
+    sqlConnection.commit()
     return "finishedNewMeasurement"
 
 
@@ -159,7 +164,7 @@ def sendBackAllMeasurements(username):
     cursor.execute(sqlCommand, (username,))
     records = cursor.fetchall()
     #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  #for multi measurement implementation
-    payload = "" + str(ALLMEASUREMENTTYPE)
+    payload = "" + str(ALLMEASUREMENTTYPE)+ username
     #print("checkpoint 2") #debugging logs
     print("payload is "+payload)
     print(records)
@@ -169,7 +174,7 @@ def sendBackAllMeasurements(username):
        # payload += ((armLength.length + "armLength".size) + "armLength" + armLength + (
               #      circum1.length + circum1.length) + "circum1" + circum1 + (
                            #     circum2.length + circum2.length) + "circum2" + circum2)
-        payload += str(armLength)+str(circum1)+str(circum2)
+        payload +=  str(armLength)+str(circum1)+str(circum2)
         
     print("payload again is "+payload)
     return payload
@@ -210,7 +215,7 @@ while (True):
 
     # parsePacket
     payload = choice(parsePacket(data))
-    print("The payload is "+payload)
+    print("The payload is "+str(payload))
     time.sleep(2)
 
     # Send back a packet based on payload value, needs refactoring (unneeded if cases)
@@ -235,6 +240,7 @@ while (True):
     #sqlConnection.commit()
     #print("insert done")
     
+
 
 
 
