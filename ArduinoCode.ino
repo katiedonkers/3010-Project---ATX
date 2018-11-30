@@ -7,7 +7,7 @@
 
 int startStop; //to start the measuring process
 
-const long strapLength = 150; //temp length 
+//const long strapLength = 150; //temp length 
 long lengthBlue;              //calculated length 
 long lengthGreen;             // calculated length 
 const long distanceStep = 5; //temp length
@@ -98,7 +98,7 @@ void loop() {
      count++; 
      delay(20); 
    }
-    int averageDistance;
+    int averageDistance=0;
   for(int i =0; i<100; i++){                //traverces the 100 measurments to calculate average 
     averageDistance += distance[i];
   }
@@ -110,25 +110,26 @@ void loop() {
     startStop = 0;                        //ensures it doesnt rerun the loopp until told to 
     
     //unwind 
-    while(stepTakenGreen != 0 && stepTakenBlue != 0){
-      if(stepTakenGreen != 0){
+    while(stepTakenGreen != 0 ){
+      
         myGreenStepper.step(stepsPerRevolution);
         stepTakenGreen--;
         delay(20);
       }
-      if(stepTakenBlue != 0){
+    while ( stepTakenBlue != 0){
         myBlueStepper.step(stepsPerRevolution);
         stepTakenBlue--;
         delay(20);
-      }
     }
 
  }  
 }
 
 void lengthCalc(){
-   lengthBlue = strapLength - (stepTakenBlue*distanceStep);  //calculates the circumfrance of the arm using the length of stap - the number of steps times the distance pre step
-   lengthGreen = strapLength - (stepTakenGreen*distanceStep);
+  // lengthBlue = strapLength - (stepTakenBlue*distanceStep);  //calculates the circumfrance of the arm using the length of stap - the number of steps times the distance pre step
+   //lengthGreen = strapLength - (stepTakenGreen*distanceStep);
+  lengthBlue = stepTakenBlue;
+  lengthGreen = stepTakenGreen;
 }
 
 
