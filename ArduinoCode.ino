@@ -61,21 +61,21 @@ void loop() {
   
  if(startStop == 1) {         //only starts when pi says to 
   
-  while(digitalRead(buttonBlue)!=HIGH && digitalRead(buttonGreen)!=HIGH){   //run stepper motors till tightened
+  while(digitalRead(buttonBlue)!=HIGH {   //run stepper motors till tightened
     
-    if(digitalRead(buttonBlue)!=HIGH){                  //run blue stepper
+                    //run blue stepper
     myBlueStepper.step(-stepsPerRevolution);
     stepTakenBlue++;
     delay(250);
     }
-    if(digitalRead(buttonGreen)!=HIGH){                 //run green stepper 
+        
+   while( digitalRead(buttonGreen)!=HIGH) {               //run green stepper 
     myGreenStepper.step(-stepsPerRevolution);
     stepTakenGreen++;
     delay(250);
     }
     
     
-  }
   
   lengthCalc();                           //calculates length of both circomference 
 
