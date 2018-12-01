@@ -33,7 +33,7 @@ public class UdpSendPi extends AppCompatActivity implements Runnable {
                     DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     System.out.println("about to receive on socket");
                     serverSocket.receive(receivePacket);
-                    String msg = new String(receivePacket.getData());
+                    msg = new String(receivePacket.getData());
                     System.out.println("We made it past the receive socket with: " + msg);
 
             }catch (Exception e){
