@@ -41,24 +41,33 @@ public class showMeasureActivity extends AppCompatActivity {
         System.out.println("about to start thread");
         thread.start();
         System.out.println("thread started");
+        
+        //##################### START OF CODE ############################
+          String popup1 = "Taking your new measurements! Stay tuned...";
+          String popup2 = "$$ ENjoy your fresh new measurements $$";
+          Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,Snackbar.LENGTH_LONG);
+          mySnackbar.show();
+         try {
+              Thread.sleep(80000); //wait enough for system to have measurements rdy
+          } catch (InterruptedException e) {
+              e.printStackTrace();
+          }
+          
+         String msg = cls.getMsg();
+         mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,Snackbar.LENGTH_LONG);         
+         textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
+         mySnackbar.show();
+         
+         //################# SENDING BACK TO DATABASE ################
+         //MIGHT NEED MORE TIME TO POWER UP THE DATABASE PI AGAIN
+         try {
+              Thread.sleep(80000); 
+          } catch (InterruptedException e) {
+              e.printStackTrace();
+          } 
+          
+         //Make new thread
+         //Send measuremetns to pi again
 
-        //Get information from Pi
-//        String msg = cls.getMsg();
-//
-//        //GET PACKET BACK TO MAIN - deal with errors, and adding to database in MAIN
-//
-//        //display new measurements to user
-//        textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
-
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-//        String popup1 = "Taking your new measurements! Stay tuned...";
-//        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,
-//                6000);
-//        mySnackbar.show();
     }
 }
