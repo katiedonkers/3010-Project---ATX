@@ -37,11 +37,11 @@ public class UDPAndroidToDB extends AppCompatActivity implements Runnable  {
             sendData = msg.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
             serverSocket.send(sendPacket);
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
+            //DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+            //serverSocket.receive(receivePacket);
 
-            msg = new String( receivePacket.getData());
-            System.out.println("Got a message back from the database after sending : " + msg);
+            //msg = new String( receivePacket.getData());
+            //System.out.println("Got a message back from the database after sending : " + msg);
            
         }catch (Exception e){
             Log.e(" UDP client Exception", "error: ", e);
