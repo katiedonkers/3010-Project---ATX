@@ -11,6 +11,7 @@ import android.view.View;
 public class showMeasureActivity extends AppCompatActivity {
 
     TextView textView;
+    String usernamex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,7 @@ public class showMeasureActivity extends AppCompatActivity {
 
         //Display username
         TextView textView2 = findViewById(R.id.NameOnMeasPage);
+        usernamex = message.substring(1, 10 );
         String username = message;
         textView2.setText("Username: " + username.substring(1, 10 ));
 
@@ -55,10 +57,10 @@ public class showMeasureActivity extends AppCompatActivity {
           
          String msg = cls.getMsg();
          mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,Snackbar.LENGTH_LONG);         
-         textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
+         textView.setText("Length: " + msg.substring(0, 1) + "\n Wrist Circumference: " + msg.substring(1, 2) + "\n Elbow Circumference: " + msg.substring(2, 3));
          mySnackbar.show();
          
-         //################# SENDING BACK TO DATABASE ################
+         //################# SENDING BACK TO DATABASE ###################
          //MIGHT NEED MORE TIME TO POWER UP THE DATABASE PI AGAIN
          try {
               Thread.sleep(80000); 
@@ -66,8 +68,13 @@ public class showMeasureActivity extends AppCompatActivity {
               e.printStackTrace();
           } 
           
-         //Make new thread
-         //Send measuremetns to pi again
+        UDPAndroidToDB clsDB = new UDPAndroidToDB("3"+usernamex+msg.substring(0, 1)+msg.substring(1, 2)+msg.substring(2, 3));
+        System.out.println("creating thread UDPAndroidToDB");
+        Thread thread2 = new Thread(clsDB);
+        thread2.start();
+        System.out.println("thread UDPAndroidToDB started");
+        
+        //############# END OF NEW CODE #################################
 
     }
 }
