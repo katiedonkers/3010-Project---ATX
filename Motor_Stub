@@ -2,6 +2,8 @@
 
 */
 
+//UNUSED CLASS
+
 //motor set up
 #include <Stepper.h>
 int startStop; //to start the measuring process
