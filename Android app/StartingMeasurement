@@ -10,6 +10,8 @@ public class StartingMeasurement extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_starting_measurement);
     }
+    
+    //NOT USING THIS CLASS
 
 
 }
