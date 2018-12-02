@@ -46,30 +46,37 @@ public class showMeasureActivity extends AppCompatActivity {
         //textView.setText("testetstetstetstetstetstet");
 
         //##################### START OF CODE ############################
-        String popup1 = "Taking your new measurements! Stay tuned...";
-        String popup2 = "$$ ENjoy your fresh new measurements $$";
-        //Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,Snackbar.LENGTH_LONG);
-       // mySnackbar.show();
+//        String popup1 = "Taking your new measurements! Stay tuned...";
+//        String popup2 = "Here are your new measurements!";
+//        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout2), popup1, 10000);
+//        mySnackbar.show();
+
         try {
-            Thread.sleep(80000); //wait enough for system to have measurements rdy
+            Thread.sleep(50000); //wait enough for system to have measurements rdy
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         String msg = cls.getMsg();
-        //mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup1,Snackbar.LENGTH_LONG);
+        System.out.println("here is the msg we got for measurements: " + msg);
+        System.out.println("here is the parsed first measurement: " + msg.substring(1, 3));
+        System.out.println("here is the parsed second measurement: " + msg.substring(5, 6));
+        System.out.println("here is the parsed third measurement: " + msg.substring(8, 9));
+
+        //mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup2,10000);
         textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
-       // mySnackbar.show();
+        //mySnackbar.show();
 
         //################# SENDING BACK TO DATABASE ###################
         //MIGHT NEED MORE TIME TO POWER UP THE DATABASE PI AGAIN
         try {
-            Thread.sleep(80000);
+            Thread.sleep(50000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        UDPAndroidToDB clsDB = new UDPAndroidToDB("3"+usernamex+msg.substring(0, 1)+msg.substring(1, 2)+msg.substring(2, 3));
+
+        UDPAndroidToDB clsDB = new UDPAndroidToDB("3"+usernamex+msg.substring(1, 3)+msg.substring(5, 6)+msg.substring(8, 9));
         System.out.println("creating thread UDPAndroidToDB");
         Thread thread2 = new Thread(clsDB);
         thread2.start();
