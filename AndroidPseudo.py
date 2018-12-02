@@ -1,6 +1,6 @@
 # code to mock inputs from Android app to database: user login, user creation, display measurements
 import socket, sys, time
-
+#UNUSED
 # Android send packets
 loginPacketType = 0
 retryLoginPacketType = 1
