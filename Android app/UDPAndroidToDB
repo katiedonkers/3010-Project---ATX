@@ -1,5 +1,7 @@
 package com.example.katie.atx;
 
+
+
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,7 +20,7 @@ public class UDPAndroidToDB extends AppCompatActivity implements Runnable  {
     public static final String EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE";
     String ip= "192.168.43.231";
     String msg;
-   
+
     public UDPAndroidToDB(String msg){
         this.msg = msg;
     }
@@ -27,11 +29,11 @@ public class UDPAndroidToDB extends AppCompatActivity implements Runnable  {
     @Override
     public void run() {
         try{
-            DatagramSocket serverSocket = new DatagramSocket(9878);
+            DatagramSocket serverSocket = new DatagramSocket(1100);
             byte[] receiveData = new byte[1024];
             byte[] sendData = new byte[1024];
             boolean running = true;
-           
+
             InetAddress IPAddress = InetAddress.getByName(ip);
             int port = 1050;
             sendData = msg.getBytes();
@@ -42,7 +44,7 @@ public class UDPAndroidToDB extends AppCompatActivity implements Runnable  {
 
             //msg = new String( receivePacket.getData());
             //System.out.println("Got a message back from the database after sending : " + msg);
-           
+
         }catch (Exception e){
             Log.e(" UDP client Exception", "error: ", e);
         }
@@ -52,7 +54,7 @@ public class UDPAndroidToDB extends AppCompatActivity implements Runnable  {
     public String getMsg(){
         return this.msg;
     }
-    
+
 
 
 
