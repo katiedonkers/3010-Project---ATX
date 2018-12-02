@@ -1,27 +1,73 @@
-
-import serial;
-//UNUSED
-/*
-  
-  
-  code for reciving information from the android app
-  
-  
-*/
+mport socket, sys, time, serial
 
 
+def runArduino():
 
-def runArduino():                                     //function that runs arduino for 1 measurment 
-   
-  arduinoSerialData = serial.Serial('/dev/ttyACM0', 9600); //create variable to simplicy sending messages 
-                                                         // '/dev/ttyACM0' is the name of arduino on pi given in control panel when verified 
-  arduinoSerialData.write('1');                           //starts arduino 
-  
-  measurments = [];                                     //creates array for measurments 
-  count = 0;                                            //initialize temp counter 
-  while(count<3):           
-    if(arduinoSerialData.inWaiting()>0):
-        measurments.append(arduinoSerialData.readline()); //add measurment to end of array. order is circumferance 1, circumferance 2, distance 
-        count++;
-        
-  return measurments;                                   //returns array 
+
+        arduinoSerialData = serial.Serial('/dev/ttyACM0', 9600)
+#create variable to simplicy sending messages
+        # print("checkpoint 1")
+    # '/dev/ttyACM0' is the name of arduino on pi given in control
+panel when verified
+        arduinoSerialData.write(str(1))
+        arduinoSerialData.write(str(1))
+        #arduinoSerialData.write(str(1))
+
+        measurments = []                                     #creates
+array for measurments
+        count = 0
+#initialize temp counter
+        while(count<3):
+                if(arduinoSerialData.inWaiting()>0):
+
+
+measurments.append(arduinoSerialData.readline()) #add measurment to
+end of array. order is circumferance 1, circumferance 2, distance
+                        count=count+1
+
+        return measurments
+
+
+
+
+
+
+
+def temprun():
+      measurements = [1,2,2]
+      return measurements
+
+
+host = "192.168.43.128"
+port = 52915
+server_address = (host, port)
+host_address = ("192.168.43.231", 1059)
+
+
+
+#create socket
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print('trying to bind')
+s.bind(host_address)
+print('bound')
+
+data, address = s.recvfrom(1024)
+print("data is "+ data)
+#print( address)
+
+print("starting arduino")
+realMeasurnetns = runArduino()
+#print("messi"+ str(realMeasurnetns[0])+"," +
+str(realMeasurnetns[1])+","+ str(realMeasurnetns[2]))
+
+
+#measurements = temprun()
+
+print("we got this from the arduino:")
+print(realMeasurnetns)
+stringMessage =
+"8"+str(realMeasurnetns[2])+str(realMeasurnetns[0])+str(realMeasurnetns[1])
+
+
+s.sendto(stringMessage.encode("utf-8"), address)
+print('sent packet containing '+stringMessage )
