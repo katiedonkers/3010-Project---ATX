@@ -1,5 +1,5 @@
 import socket, sys, time
-
+#UNUSED
 newMeasurementsPacketFlag = 3
 temp = 99
 
