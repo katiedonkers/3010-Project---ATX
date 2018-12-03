@@ -148,11 +148,11 @@ def newMeasurement(data):
         if data[i] is None:
             return "badbytes"
     username = data[1:11]
-    armLength = data[11]
-    circum1 =data[12]
-    circum2 = data[13]
+    armLength = data[11:13]
+    circum1 =data[13:15]
+    circum2 = data[15:17]#might be out of range
     cursor.execute(sqlCommand,(username.decode('utf'),))
-    cursor.execute(sqlCommand2,(username.decode('utf'),armLength-48,circum1-48,circum2-48))
+    cursor.execute(sqlCommand2,(username.decode('utf'),int(armLength),int(circum1),int(circum2)))
     sqlConnection.commit()
     return "finishedNewMeasurement"
 
