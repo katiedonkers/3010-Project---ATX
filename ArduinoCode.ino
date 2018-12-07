@@ -2,7 +2,6 @@
 #include <Stepper.h>
 
 /*
-
 */
 
 int startStop; //to start the measuring process
@@ -25,17 +24,17 @@ const int buttonGreen = 3;          //setting pins to parts
 const int buttonBlue = 2; 
 
 //Ultrasonic sensor Pinss
-const int blueTrig = 13;
+const int blueTrig = 0;
 const int blueEcho = 4;
 
 const int greenTrig = 1;
-const int greenEcho = 0;
+const int greenEcho = 13;
 
 
 void setup() {
   startStop = 0; 
   
-  pinMode(blueTrig, OUTPUT);        //set pin type
+  pinMode(A5, OUTPUT);        //set pin type
   pinMode(blueEcho, INPUT);
   
   pinMode(greenTrig, OUTPUT);
@@ -55,55 +54,61 @@ void setup() {
 
 void loop() {
   
-  if(Serial.read() == 49){             //waiting on the pi so start process
+  if(Serial.read() == 49 || Serial.read() == 1){      //waiting on the pi so start process
     startStop = 1;            //start pi
   }
   
- if(startStop == 1) {         //only starts when pi says to 
+ if(startStop == 1) { //only starts when pi says to 
   
-  while(digitalRead(buttonBlue)!=HIGH {   //run stepper motors till tightened
+  
+  while(digitalRead(buttonBlue)!=HIGH) {   //run stepper motors till tightened
     
                     //run blue stepper
     myBlueStepper.step(-stepsPerRevolution);
     stepTakenBlue++;
     delay(250);
+    
     }
-        
+    Serial.println(stepTakenBlue);
+    
    while( digitalRead(buttonGreen)!=HIGH) {               //run green stepper 
     myGreenStepper.step(-stepsPerRevolution);
     stepTakenGreen++;
     delay(250);
-    }
     
+    }
+    Serial.println(stepTakenGreen);
     
   
   lengthCalc();                           //calculates length of both circomference 
-
-  Serial.println(lengthBlue);             //sends info back to pi that is waiting
-  Serial.println(lengthGreen);
+  
+    //sends info back to pi that is waiting
+  
+  
  
    int count = 0;                         //next part calculates distance between both straps 
-   int distance[100];
+   int distance[25];
    int duration; 
-   while(count<100){                      //calculates 100 times for presision 
+   while(count<25){                      //calculates 100 times for presision 
      //Serial.println(count);
+     
+     digitalWrite(A5, HIGH);
      digitalWrite(greenTrig, HIGH);
-     digitalWrite(blueTrig, HIGH);
      delayMicroseconds(10); 
      digitalWrite(greenTrig, LOW);
-     digitalWrite(blueTrig, LOW);
-     
+     digitalWrite(A5, LOW);
      duration = pulseIn(blueEcho, HIGH);
+     
      distance[count] = (duration * 0.034);
      count++; 
      delay(20); 
    }
     int averageDistance=0;
-  for(int i =0; i<100; i++){                //traverces the 100 measurments to calculate average 
+  for(int i =0; i<25; i++){                //traverces the 100 measurments to calculate average 
     averageDistance += distance[i];
   }
     
-    averageDistance = averageDistance/100; //calculates average 
+    averageDistance = averageDistance/25; //calculates average 
     
     Serial.println(averageDistance);        //sends average distance back to pi
     
@@ -131,8 +136,6 @@ void lengthCalc(){
   lengthBlue = stepTakenBlue;
   lengthGreen = stepTakenGreen;
 }
-
-
 
 
 
