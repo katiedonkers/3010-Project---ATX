@@ -39,7 +39,7 @@ public class UdpSend extends AppCompatActivity implements Runnable  {
 
                 InetAddress IPAddress = InetAddress.getByName(ip);
                 int port = 1050;
-                //String capitalizedSentence = "0karimkarim";
+                
                 sendData = msg.getBytes();
                 DatagramPacket sendPacket =
                         new DatagramPacket(sendData, sendData.length, IPAddress, port);
@@ -51,16 +51,7 @@ public class UdpSend extends AppCompatActivity implements Runnable  {
                 String stringBuffer = new String( receivePacket.getData());
                 msg = stringBuffer;
                 stringBuffer.charAt(0);
-                //dealWithPacket(stringBuffer);
-//                if(stringBuffer.charAt(0)== '9'){
-//                    System.out.println("The first bye of the packet it: " + stringBuffer.charAt(0));
-//                }else if (stringBuffer.charAt(0) == '5'){
-//                    System.out.println("The first bye of the packet it: " + stringBuffer.charAt(0));
-//                }else if (stringBuffer.charAt(0) == '8'){
-//                    System.out.println("The first bye of the packet it: " + stringBuffer.charAt(0));
-//                }else{
-//                    System.out.println("couldn't parse, first byte is: " + stringBuffer.charAt(0));
-//                }
+               
 
                 String sentence = new String( receivePacket.getData());
                 System.out.println("RECEIVEDDDDD: " + sentence);
