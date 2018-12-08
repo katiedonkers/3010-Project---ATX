@@ -28,10 +28,10 @@ public class MainActivity extends AppCompatActivity {
     public void sendMessage(View view) {
         count++;
         System.out.println("entering send message function");
-        //Intent intent = new Intent(this, DisplayMessageActivity.class);
+        
         EditText editText = (EditText) findViewById(R.id.editText);
         String message = "0"+editText.getText().toString(); //the 0 is log in type
-        //intent.putExtra(EXTRA_MESSAGE, message);
+        
         System.out.println("creating class udp send");
 
         if(count>1){
@@ -64,18 +64,8 @@ public class MainActivity extends AppCompatActivity {
             dealWithPacket(cls.getMsg());
 
 
-            //Also check for UdpSendPi to return a message - this is measurements from Pi
-//            UdpSendPi cls2 = new UdpSendPi();
-//
-//            //We got a packet from Pi, need to check it
-//            while(flag) {
-//                String packetFromPi = cls2.getMsg();
-//                if (packetFromPi != null) {
-//                    System.out.println("WE GOT SOMETHING FROM THE PI! It is: " + packetFromPi);
-//                    dealWithPacket(cls2.getMsg());
-//                    flag = false;
-//                }
-//            }
+          
+
         }
 
 
@@ -98,12 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     5000);
             mySnackbar.show();
 
-//            System.out.println("it's an 8");
-//            Intent intent = new Intent(this, showMeasureActivity.class);
-//            EditText editText = (EditText) findViewById(R.id.editText);
-//            String message = data; //the 0 is log in type
-//            intent.putExtra(EXTRA_MESSAGE, message);
-//            startActivity(intent);
+
 
         }else if (data.charAt(0) == '1') { //User entered name longer than 10 characters
             System.out.println("it's a 1");
