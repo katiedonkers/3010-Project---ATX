@@ -113,15 +113,6 @@ def login(data):
     else:
         return newUser(data)
     
-#Not implemented on client side
-def retryLogin(data):
-    global count
-    count = count + 1  # this variable is not global
-    if count <= 3:
-        return login(data)
-    else:
-        count = 0
-        return "max Logins"
 
 #Adds a user to the database then logs in with that user
 def newUser(data):
@@ -142,15 +133,15 @@ def newMeasurement(data):
     #delete old measurement
     sqlCommand = "DELETE FROM usernamesAndMeasurements WHERE username=? "
     sqlCommand2 = "INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (?,?,?,?)"
-    #print(data)
+    
     for i in range(len(data)):
-        #print(data[i])
+       
         if data[i] is None:
             return "badbytes"
     username = data[1:11]
     armLength = data[11:13]
     circum1 =data[13:15]
-    circum2 = data[15:17]#might be out of range
+    circum2 = data[15:17]
     cursor.execute(sqlCommand,(username.decode('utf'),))
     cursor.execute(sqlCommand2,(username.decode('utf'),int(armLength),int(circum1),int(circum2)))
     sqlConnection.commit()
@@ -160,20 +151,18 @@ def newMeasurement(data):
 
 def sendBackAllMeasurements(username):
     sqlCommand = "Select * from usernamesAndMeasurements where username=?"
-    print("the username is " + username) #debugging logs
+    print("the username is " + username)
     cursor.execute(sqlCommand, (username,))
     records = cursor.fetchall()
-    #payload = "" + str(ALLMEASUREMENTTYPE) + "" + str(len(records))  #for multi measurement implementation
+   
     payload = "" + str(ALLMEASUREMENTTYPE)+ username
-    #print("checkpoint 2") #debugging logs
+  
     print("payload is "+payload)
     print(records)
     for i in range(len(records)): #for multi-measurement implementation
-        #payload += "xxxx" 
+        
         armLength, circum1, circum2 = parseSQLRrow(records[i])
-       # payload += ((armLength.length + "armLength".size) + "armLength" + armLength + (
-              #      circum1.length + circum1.length) + "circum1" + circum1 + (
-                           #     circum2.length + circum2.length) + "circum2" + circum2)
+      
         payload +=  str(armLength)+str(circum1)+str(circum2)
         
     print("payload again is "+payload)
@@ -197,7 +186,7 @@ def parseSQLRrow(parsePacketrecord):
 # get SQL initialized
 sqlConnection = initializesql("/home/pi/eztables.db")
 cursor = sqlConnection.cursor()
-#sqlite3.autocommit(True)
+
 
 while (True):
     
@@ -230,15 +219,7 @@ while (True):
     except Exception as e:
                 print(e)
             
-            
-    #code for database quick access
-    #cursor.execute("DELETE FROM usernamesAndMeasurements WHERE username=?",(bytes(str(tempDeleteme), 'utf-8'),))
-    #sqlConnection.commit()
-    #print("Inserting record")
-    #cursor.execute("INSERT INTO usernamesAndMeasurements (username,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)")
-    #"INSERT INTO usernamesAndMeasurements (userNames,armLength,circum1,circum2) VALUES (\"ababababka\",1,2,2)"
-    #sqlConnection.commit()
-    #print("insert done")
+   
     
 
 
