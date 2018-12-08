@@ -43,13 +43,10 @@ public class showMeasureActivity extends AppCompatActivity {
         System.out.println("about to start thread");
         thread.start();
         System.out.println("thread started");
-        //textView.setText("testetstetstetstetstetstet");
+        
 
         //##################### START OF CODE ############################
-//        String popup1 = "Taking your new measurements! Stay tuned...";
-//        String popup2 = "Here are your new measurements!";
-//        Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout2), popup1, 10000);
-//        mySnackbar.show();
+
 
         try {
             Thread.sleep(50000); //wait enough for system to have measurements rdy
@@ -63,19 +60,12 @@ public class showMeasureActivity extends AppCompatActivity {
         System.out.println("here is the parsed second measurement: " + msg.substring(5, 6));
         System.out.println("here is the parsed third measurement: " + msg.substring(8, 9));
 
-        //mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), popup2,10000);
+        
         textView.setText("Length: " + msg.substring(1, 2) + "\n Wrist Circumference: " + msg.substring(2, 3) + "\n Elbow Circumference: " + msg.substring(3, 4));
-        //mySnackbar.show();
+        
 
         //################# SENDING BACK TO DATABASE ###################
-        //MIGHT NEED MORE TIME TO POWER UP THE DATABASE PI AGAIN
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
+       
         UDPAndroidToDB clsDB = new UDPAndroidToDB("3"+usernamex+msg.substring(1, 3)+msg.substring(5, 6)+msg.substring(8, 9));
         System.out.println("creating thread UDPAndroidToDB");
         Thread thread2 = new Thread(clsDB);
